@@ -7,19 +7,22 @@
 
     <!-- Libreria para sanear la entrada de HTML -->
     <script src="https://unpkg.com/dompurify@2.4.0/dist/purify.min.js"></script>
+
+    <!-- Estilo de la pagina -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <h1>Entrega 1: Ataque XSS</h1>
 
-    <label for="input">Introduce tu comentario: <p>Ejemplo '&lt;img src="x" onerror="alert('XSS!')"&gt;'</p></label>
-    <input id="input" type="text">
+    <label for="input">Introduce tu comentario: <p id="ejemplo">Ejemplo '&lt;img src="x" onerror="alert('XSS!')"&gt;'</p></label>
+    <input id="input" type="text"> <br><br>
 
     <div class="botones">
         <button id="btn-inseguro">Mostrar sin sanear (vulnerable)</button>
         
         <!-- <p>Ejemplo '<img src="x" onerror="alert('XSS!')"> </p> -->
         <button id="btn-seguro">Mostrar con saneado (seguro)</button>
-    </div>
+    </div><br><br>
 
     <h3>Comentarios:</h3>
     <div id="output"></div>

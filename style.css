@@ -1,0 +1,14 @@
+body {
+    margin: auto auto;
+    padding: 5% 10%;
+    background-color: gainsboro;
+  }
+
+  #ejemplo{
+    color:red;
+  }
+
+  output{
+    background-color: white;
+  }
+  
