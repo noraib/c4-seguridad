@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <!-- Libreria para sanear la entrada de HTML -->
+    <script src="https://unpkg.com/dompurify@2.4.0/dist/purify.min.js"></script>
+</head>
+<body>
+    <h1>Entrega 1: Ataque XSS</h1>
+
+    <label for="input">Introduce tu comentario: <p>Ejemplo '&lt;img src="x" onerror="alert('XSS!')"&gt;'</p></label>
+    <input id="input" type="text">
+
+    <div class="botones">
+        <button id="btn-inseguro">Mostrar sin sanear (vulnerable)</button>
+        
+        <!-- <p>Ejemplo '<img src="x" onerror="alert('XSS!')"> </p> -->
+        <button id="btn-seguro">Mostrar con saneado (seguro)</button>
+    </div>
+
+    <h3>Comentarios:</h3>
+    <div id="output"></div>
+
+    <h4>Notas:</h4>
+    <ul>
+        <li>El botón <strong>vulnerable</strong> muestra el contenido usando <code>innerHTML</code>.</li>
+        <li>El botón <strong>seguro</strong> muestra el contenido usando <code>textContent</code> o DOMPurify para sanitizar HTML permitiendo solo lo necesario.</li>
+    </ul> 
+</body>
+</html>
+
+<script>
+    const input = document.getElementById("input");
+    const output = document.getElementById('output');
+    const btn_inseguro = document.getElementById("btn-inseguro");
+    const btn_seguro = document.getElementById("btn-seguro");
+ 
+
+    btn_inseguro.addEventListener("click", function(){
+        const valor = input.value.trim();
+        const comentario = document.createElement('div');
+        comentario.classList.add('comentario');
+
+        comentario.innerHTML = valor;
+
+        output.appendChild(comentario);
+        input.value = '';
+
+    })
+
+    btn_seguro.addEventListener('click', function() {
+        const valor = input.value.trim();
+        const comentario = document.createElement('div');
+        comentario.classList.add('comentario');
+
+        //Saneamos con DOMPurify (elimina scripts y contenido peligroso)
+        const limpio = DOMPurify.sanitize(valor);
+
+        comentario.innerHTML = limpio;
+
+        output.appendChild(comentario);
+        input.value = '';
+    });
+
+</script>
