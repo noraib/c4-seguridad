@@ -8,7 +8,24 @@ body {
     color:red;
   }
 
-  output{
+  .comentario{
     background-color: white;
+    width: fit-content;
   }
   
+
+  #input{
+    width: 98%;
+    padding: 10px;
+
+  }
+  .botones{
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .botones button{
+    width: 49%;
+    padding: 10px;
+  }

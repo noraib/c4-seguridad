@@ -14,7 +14,8 @@
 <body>
     <h1>Entrega 1: Ataque XSS</h1>
 
-    <label for="input">Introduce tu comentario: <p id="ejemplo">Ejemplo '&lt;img src="x" onerror="alert('XSS!')"&gt;'</p></label>
+    <label for="input">Introduce tu comentario: </label>
+    <p id="ejemplo">Ejemplo: '&lt;img src="x" onerror="alert('XSS!')"&gt;'</p>
     <input id="input" type="text"> <br><br>
 
     <div class="botones">
@@ -22,7 +23,7 @@
         
         <!-- <p>Ejemplo '<img src="x" onerror="alert('XSS!')"> </p> -->
         <button id="btn-seguro">Mostrar con saneado (seguro)</button>
-    </div><br><br>
+    </div><br>
 
     <h3>Comentarios:</h3>
     <div id="output"></div>
