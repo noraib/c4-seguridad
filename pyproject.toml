@@ -5,9 +5,18 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "cryptography>=46.0.5",
+    "matplotlib>=3.10.8",
+    "numpy>=2.4.2",
     "optuna-dashboard>=0.20.0",
+    "pillow>=12.1.1",
     "tensorboard>=2.20.0",
     "torch>=2.10.0",
     "torchaudio>=2.10.0",
     "torchvision>=0.25.0",
+]
+
+[tool.uv.workspace]
+members = [
+    "proyecto_esteganografia",
 ]
