@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "cryptography>=46.0.5",
+    "datasets>=4.7.0",
     "matplotlib>=3.10.8",
     "numpy>=2.4.2",
     "optuna-dashboard>=0.20.0",
