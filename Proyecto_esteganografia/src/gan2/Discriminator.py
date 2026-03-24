@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 class Discriminator(nn.Module):
-    def __init__(self, img_channels=3, message_size=16):
+    def __init__(self, img_channels=3, message_size=128):
         super(Discriminator, self).__init__()
         self.img_channels = img_channels
         self.message_size = message_size
