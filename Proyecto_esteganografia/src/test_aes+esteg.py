@@ -9,8 +9,8 @@ def main():
     encrypted = encrypt_message(message, key)
     
     # imagen ejemplo
-    input_image = "data/imagen_ejemplo.png"
-    stego_image = "outputs/esteg_imagen/esteg_imagen.png"
+    input_image = "media_cripto_esteg/input/imagen_ejemplo.png"
+    stego_image = "media_cripto_esteg/output/esteg_imagen.png"
     
     # insertar mensaje cifrado en la imagen
     encode_lsb(input_image, encrypted, stego_image)
