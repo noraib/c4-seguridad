@@ -2,7 +2,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torchvision import datasets, transforms
+from torchvision import datasets, transforms, utils
 from torch.utils.data import DataLoader
 import os
 
@@ -13,10 +13,21 @@ import Discriminator, Generator
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 batch_size = 64
 z_dim = 100
-num_epochs = 50
+num_epochs = 500
 lr = 2e-4
-patience = 5  # para Early Stopping
 model_dir = 'modelos'  # Carpeta de destino
+samples_dir = 'muestras_entrenamiento' # Carpeta para ver progreso visual
+
+# -----------------------------
+# Función de Inicialización de Pesos (Para evitar imágenes borrosas)
+# -----------------------------
+def weights_init(m):
+    classname = m.__class__.__name__
+    if classname.find('Conv') != -1:
+        nn.init.normal_(m.weight.data, 0.0, 0.02)
+    elif classname.find('BatchNorm') != -1:
+        nn.init.normal_(m.weight.data, 1.0, 0.02)
+        nn.init.constant_(m.bias.data, 0)
 
 # -----------------------------
 # Dataset
@@ -27,39 +38,53 @@ transform = transforms.Compose([
     transforms.Normalize([0.5]*3, [0.5]*3)
 ])
 
-#60,000 imágenes de 32x32 píxeles de 10 categorías (coches, aviones, pájaros...)
+# 60,000 imágenes de 32x32 píxeles de 10 categorías (coches, aviones, pájaros...)
 dataset = datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
 dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
 # -----------------------------
 # Instanciar Generator y Discriminator
 # -----------------------------
-# Asumimos que tus clases Generator y Discriminator ya están definidas
 G = Generator.Generator(z_dim=z_dim, img_channels=3).to(device)
 D = Discriminator.Discriminator(img_channels=3).to(device)
+
+# Aplicar inicialización de pesos
+G.apply(weights_init)
+D.apply(weights_init)
 
 # -----------------------------
 # Optimizers y losses
 # -----------------------------
 optimizerG = optim.Adam(G.parameters(), lr=lr, betas=(0.5, 0.999))
 optimizerD = optim.Adam(D.parameters(), lr=lr, betas=(0.5, 0.999))
+
+# Learning Rate Decay (reduce el LR a la mitad cada 100 épocas)
+schedulerG = optim.lr_scheduler.StepLR(optimizerG, step_size=100, gamma=0.5)
+schedulerD = optim.lr_scheduler.StepLR(optimizerD, step_size=100, gamma=0.5)
+
 criterion = nn.BCELoss()  # real/falso
+fixed_noise = torch.randn(64, z_dim).to(device) # Ruido fijo para comparar evolución visual
+
+os.makedirs(model_dir, exist_ok=True)
+os.makedirs(samples_dir, exist_ok=True)
 
 # -----------------------------
-# Entrenamiento con curriculum de mensajes
+# Entrenamiento
 # -----------------------------
+print("Iniciando entrenamiento GAN balanceado...")
+
 for epoch in range(num_epochs):
     for i, (real_images, _) in enumerate(dataloader):
         b_size = real_images.size(0)
         real_images = real_images.to(device)
         
-        # Etiquetas
-        real_labels = torch.ones(b_size, 1).to(device)
+        # Etiquetas con Label Smoothing (0.9 para ayudar al Generador)
+        real_labels = torch.full((b_size, 1), 0.9, device=device)
         fake_labels = torch.zeros(b_size, 1).to(device)
         
-        # --------------------
-        # Entrenar Discriminator
-        # --------------------
+        # ==========================================
+        # 1. ENTRENAR DISCRIMINATOR
+        # ==========================================
         D.zero_grad()
         
         # Real images
@@ -76,42 +101,59 @@ for epoch in range(num_epochs):
         lossD.backward()
         optimizerD.step()
         
-        # --------------------
-        # Entrenar Generator
-        # --------------------
+        # ==========================================
+        # 2. ENTRENAR GENERATOR (PASO 1)
+        # ==========================================
         G.zero_grad()
+        # Para el generador usamos etiquetas de 1.0 porque su objetivo es engañar al 100%
         output_fake_for_G = D(fake_images) 
-        lossG = criterion(output_fake_for_G, real_labels) 
-        
+        lossG = criterion(output_fake_for_G, torch.ones(b_size, 1).to(device)) 
         lossG.backward()
         optimizerG.step()
-    
-    print(f"Epoch [{epoch+1}/{num_epochs}] Loss D: {lossD.item():.4f}, Loss G: {lossG.item():.4f}")
 
-
-    # -----------------------------
-    # Checkpoint: mejor version
-    # -----------------------------
-    if lossG.item() < best_g_loss:
-        best_g_loss = lossG.item()
+        # ==========================================
+        # 3. ENTRENAR GENERATOR (PASO 2 - Extra Boost)
+        # ==========================================
+        # Como el Discriminador es muy fuerte, entrenamos al Generador una 2da vez
+        # por cada paso del Discriminador para equilibrar las fuerzas.
+        z2 = torch.randn(b_size, z_dim).to(device)
+        fake_images2 = G(z2)
+        G.zero_grad()
+        output_fake_for_G2 = D(fake_images2)
+        lossG2 = criterion(output_fake_for_G2, torch.ones(b_size, 1).to(device))
+        lossG2.backward()
+        optimizerG.step()
         
-        path_best = os.path.join(model_dir, 'best_generator.pth')
-        torch.save(G.state_dict(), path_best)
-
-        epochs_without_improvement = 0
-        print(f"  --> Nueva mejor pérdida G: {best_g_loss:.4f}. Guardado 'best_generator.pth'")
-    else:
-        epochs_without_improvement += 1
+        # Actualizamos la pérdida a mostrar para que refleje el último paso
+        lossG = lossG2 
+    
+    # Actualizar Learning Rate cada época
+    schedulerG.step()
+    schedulerD.step()
+    
+    print(f"Epoch [{epoch+1}/{num_epochs}] Loss D: {lossD.item():.4f}, Loss G: {lossG.item():.4f} | LR: {optimizerG.param_groups[0]['lr']:.6f}")
 
     # -----------------------------
-    # Early Stopping
+    # Guardado de Muestras y Checkpoints (Sin Early Stopping)
     # -----------------------------
-    if epochs_without_improvement >= patience:
-        print(f"\n[!] Early Stopping en época {epoch+1}. La pérdida G no mejoró en {patience} épocas.")
-        break
+    
+    # Guardar muestra visual cada 10 épocas
+    if (epoch + 1) % 10 == 0:
+        with torch.no_grad():
+            fake_display = G(fixed_noise)
+            utils.save_image(fake_display, f'{samples_dir}/epoch_{epoch+1}.png', normalize=True)
+
+    # Guardar checkpoint cada 50 épocas
+    if (epoch + 1) % 50 == 0:
+        path_cp = os.path.join(model_dir, f'generator_epoch_{epoch+1}.pth')
+        torch.save(G.state_dict(), path_cp)
+        print(f"  [+] Respaldo guardado: {path_cp}")
+        
+    # Guardar siempre la última época como "latest" para no perder progreso si cortas el script
+    torch.save(G.state_dict(), os.path.join(model_dir, 'latest_generator.pth'))
 
 # ---------------------------------------------------------
-# GUARDAR VERSIÓN FINAL (Al terminar o por Early Stopping)
+# GUARDAR VERSIÓN FINAL
 # ---------------------------------------------------------
 path_final = os.path.join(model_dir, 'final_gan_model.pth')
 torch.save({
@@ -124,7 +166,6 @@ torch.save({
     'optimizerD_state': optimizerD.state_dict(),
 }, path_final)
 
-print("\nEntrenamiento finalizado.")
+print("\nEntrenamiento finalizado exitosamente.")
 print(f"- Carpeta de destino: {model_dir}/")
-print(f"- Mejor Generador: best_generator.pth")
-print(f"- Estado final: final_gan_model.pth")
+print(f"- Último Generador: latest_generator.pth")

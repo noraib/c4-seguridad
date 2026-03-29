@@ -1,0 +1,16 @@
+# Ignorar el dataset descargado
+data/
+../data/
+
+# Ignorar las carpetas de caché de Python
+__pycache__/
+*.pyc
+
+# Ignorar TODAS las imágenes generadas y de muestra
+imagenes_generadas/*.png
+muestras_entrenamiento/*.png
+
+# Ignorar TODOS los modelos guardados...
+modelos/*.pth
+# ... ¡EXCEPTO el último modelo!
+!modelos/latest_generator.pth
