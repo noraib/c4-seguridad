@@ -30,10 +30,11 @@ D.eval()
 with torch.no_grad():
     # El discriminador nos devuelve un valor entre 0 y 1 
     prediction = D(input_image)
+    
+    # APLICAMOS SIGMOID AQUÍ para convertir el logit en probabilidad [0, 1]
+    probabilidad_real = torch.sigmoid(prediction).item()
 
 # -------- MOSTRAR RESULTADO --------
-probabilidad_real = prediction.item()
-
 print(f"Resultado del Discriminador: {probabilidad_real:.4f}")
 
 if probabilidad_real > 0.5:

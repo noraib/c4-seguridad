@@ -1,7 +1,10 @@
 import matplotlib.pyplot as plt
 import torch
 import numpy as np
-from Generator import Generator  # asegúrate de que la ruta sea correcta
+import os
+from Generator import Generator  
+
+os.makedirs("media_gan/generator", exist_ok=True)
 
 # -------- PARÁMETROS --------
 batch_size = 1         # por ahora generamos 1 imagen

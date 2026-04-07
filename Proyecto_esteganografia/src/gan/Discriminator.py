@@ -4,41 +4,39 @@ import torch.nn as nn
 class Discriminator(nn.Module):
     def __init__(self, img_channels=3):
         super(Discriminator, self).__init__()
-        self.img_channels = img_channels
+        
+        # Función auxiliar para crear bloques rápidamente
+        def conv_block(in_f, out_f, stride=2, use_bn=True):
+            layers = [
+                # Usamos Spectral Norm para mayor estabilidad en texturas
+                # Con esto, el discriminador se vuelve muy sensible a las inconsistencias
+                # estructurales. Esto obliga al generador a crear imágenes extremadamente
+                # coherentes.
+                nn.utils.spectral_norm(nn.Conv2d(in_f, out_f, 4, stride, 1, bias=False))
+            ]
+            if use_bn:
+                layers.append(nn.BatchNorm2d(out_f))
+            layers.append(nn.LeakyReLU(0.2, inplace=True))
+            layers.append(nn.Dropout(0.3))
+            return nn.Sequential(*layers)
 
-        self.conv_blocks = nn.Sequential(
-            # Entrada: (3, 64, 64) -> Salida: (64, 32, 32)
-            nn.Conv2d(img_channels, 64, kernel_size=4, stride=2, padding=1),
-            nn.LeakyReLU(0.2, inplace=True),
-
-            # Entrada: (64, 32, 32) -> Salida: (128, 16, 16)
-            nn.Conv2d(64, 128, kernel_size=4, stride=2, padding=1),
-            nn.BatchNorm2d(128),
-            nn.LeakyReLU(0.2, inplace=True),
-
-            # Entrada: (128, 16, 16) -> Salida: (256, 8, 8)
-            nn.Conv2d(128, 256, kernel_size=4, stride=2, padding=1),
-            nn.BatchNorm2d(256),
-            nn.LeakyReLU(0.2, inplace=True),
-
-            # Entrada: (256, 8, 8) -> Salida: (512, 4, 4)
-            nn.Conv2d(256, 512, kernel_size=4, stride=2, padding=1),
-            nn.BatchNorm2d(512),
-            nn.LeakyReLU(0.2, inplace=True)
+        self.model = nn.Sequential(
+            # Entrada: (3, 64, 64) -> (64, 32, 32)
+            conv_block(img_channels, 64, use_bn=False), # Primera capa sin BN
+            
+            # (64, 32, 32) -> (128, 16, 16)
+            conv_block(64, 128),
+            
+            # (128, 16, 16) -> (256, 8, 8)
+            conv_block(128, 256),
+            
+            # (256, 8, 8) -> (512, 4, 4)
+            conv_block(256, 512),
+            
+            # Capa final de decisión
+            nn.Conv2d(512, 1, kernel_size=4, stride=1, padding=0, bias=False),
+            # Salida: (1, 1, 1) -> Un solo valor por imagen
         )
 
-        # Flatten
-        self.flatten = nn.Flatten()
-
-        # Cabeza Real/Falso
-        self.fc_real_fake = nn.Sequential(
-            # 512 canales * 4 alto * 4 ancho = 8192 neuronas de entrada
-            nn.Linear(512*4*4, 1),
-            nn.Sigmoid() # Devuelve una probabilidad entre 0 (falso) y 1 (real)
-        )
-
-    def forward(self, img):
-        x = self.conv_blocks(img)
-        x = self.flatten(x)
-        real_fake = self.fc_real_fake(x)
-        return real_fake
+    def forward(self, x):
+        return self.model(x).view(-1, 1) # Retorna (Batch, 1)
