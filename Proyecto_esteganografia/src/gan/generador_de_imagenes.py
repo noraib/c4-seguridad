@@ -5,7 +5,7 @@ from src.gan.Generator import Generator # Asegúrate de que la ruta sea correcta
 
 # --- CONFIGURACIÓN ---
 # Aquí puedes cambiar el nombre del checkpoint que quieras usar
-CHECKPOINT = "generator_epoch_50.pth" 
+CHECKPOINT = "generator_epoch_300.pth" 
 MODEL_PATH = f"modelos/{CHECKPOINT}"
 OUTPUT_DIR = "imagenes_esteganografia"
 Z_DIM = 100
