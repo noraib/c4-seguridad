@@ -24,7 +24,6 @@ modelos_v2_barcos/*.pth
 
 # ... ¡EXCEPTO el último modelo para que el proyecto sea ejecutable al clonar!
 !modelos/latest_generator.pth
-!modelos_v2_barcos/gen_v2_epoch_550.pth
 
 # Ignorar imagenes generadas para esteganografía
 imagenes_esteganografia/*.png
