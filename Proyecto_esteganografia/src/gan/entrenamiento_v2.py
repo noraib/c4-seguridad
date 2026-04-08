@@ -6,9 +6,9 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 import os
 
-# Importamos tus clases
-from Discriminator import Discriminator 
-from Generator import Generator
+# Importamos las clases
+from DiscriminatorV2 import DiscriminatorV2
+from GeneratorV2 import GeneratorV2
 
 # 1. Inicialización de pesos
 def weights_init(m):
@@ -28,6 +28,7 @@ num_epochs = 500
 model_dir = 'modelos_v2_barcos'
 samples_dir = 'muestras_entrenamiento_barcos_v2'
 
+# TensorBoard
 writer = SummaryWriter("runs/gan_barcos_v2")
 os.makedirs(model_dir, exist_ok=True)
 os.makedirs(samples_dir, exist_ok=True)
@@ -39,14 +40,17 @@ transform = transforms.Compose([
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
 ])
 
+# Cargamos el dataset completo y luego filtramos solo las imágenes de barcos (label 8 en CIFAR-10)
 full_dataset = datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
 ship_indices = [i for i, (_, label) in enumerate(full_dataset) if label == 8]
 ship_dataset = torch.utils.data.Subset(full_dataset, ship_indices)
 dataloader = DataLoader(ship_dataset, batch_size=batch_size, shuffle=True)
 
+
+
 # Instanciar modelos y aplicar pesos
-netG = Generator(z_dim).to(device)
-netD = Discriminator().to(device)
+netG = GeneratorV2(z_dim).to(device)
+netD = DiscriminatorV2().to(device)
 netG.apply(weights_init)
 netD.apply(weights_init)
 
@@ -57,11 +61,17 @@ criterion = nn.BCELoss()
 # RUIDO FIJO: Necesitamos 64 para el de disco (8x8)
 fixed_noise = torch.randn(64, z_dim, 1, 1, device=device)
 
-print(f"Entrenamiento V2 (Barcos) iniciado.")
 
 
-starting_epoch = 500  # Empezamos desde donde lo dejaste
-new_total_epochs = 700 # Entrenaremos 200 épocas más
+
+
+
+# -------------------------------------------------------------------- #
+# COMENTAR ESTO PARA ENTRENAR DESDE CERO, DESCOMENTAR PARA FINE-TUNING #
+# -------------------------------------------------------------------- #
+# FINE-TUNING: Cargar pesos del Generador de la época 500 y continuar entrenando 
+starting_epoch = 500  # Empezamos desde donde lo dejaste (se puede ajustar si quieres empezar desde otra época)
+new_total_epochs = 700 # Entrenaremos 200 épocas más (ajusta según lo que quieras lograr)
 # Bajamos el LR para no romper el modelo (Fine-tuning suave)
 lr_finetune = 0.00005 
 
@@ -85,6 +95,13 @@ else:
 optimizerG = optim.Adam(netG.parameters(), lr=lr_finetune, betas=(0.5, 0.999))
 optimizerD = optim.Adam(netD.parameters(), lr=lr_finetune, betas=(0.5, 0.999))
 
+# -------------------------------------------------------------------- #
+
+
+# ------------- # 
+# ENTRENAMIENTO #
+# ------------- # 
+print(f"Entrenamiento V2 (Barcos) iniciado.")
 for epoch in range(starting_epoch, new_total_epochs):
     epoch_idx = epoch + 1
     
