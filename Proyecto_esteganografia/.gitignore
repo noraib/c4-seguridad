@@ -14,3 +14,6 @@ muestras_entrenamiento/*.png
 modelos/*.pth
 # ... ¡EXCEPTO el último modelo!
 !modelos/latest_generator.pth
+
+# Ignorar imagenes generadas
+imagenes_esteganografia/*.png
