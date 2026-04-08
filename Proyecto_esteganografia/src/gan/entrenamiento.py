@@ -16,13 +16,13 @@ from Generator import Generator
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 batch_size = 64
 z_dim = 100
-num_epochs = 300
+num_epochs = 500
 lr = 2e-4
 model_dir = 'modelos'
-samples_dir = 'muestras_entrenamiento'
+samples_dir = 'muestras_entrenamiento_barcos'
 
 # Inicializar TensorBoard (para ver gráficas en localhost:6006)
-writer = SummaryWriter('runs/gan_steganography_v1')
+writer = SummaryWriter('runs/gan_barcos_v1')
 
 os.makedirs(model_dir, exist_ok=True)
 os.makedirs(samples_dir, exist_ok=True)
@@ -39,7 +39,7 @@ def weights_init(m):
         nn.init.constant_(m.bias.data, 0)
 
 # -----------------------------
-# 3. Preparación del Dataset
+# 3. Preparación del Dataset (SOLO BARCOS)
 # -----------------------------
 transform = transforms.Compose([
     transforms.Resize(64),
@@ -47,10 +47,18 @@ transform = transforms.Compose([
     transforms.Normalize([0.5]*3, [0.5]*3) # Normalización a [-1, 1] para Tanh
 ])
 
-# Usamos CIFAR-10 como base
-dataset = datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
-dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+# Cargamos el dataset completo
+full_dataset = datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
 
+# Filtramos por la clase 8 (Barcos)
+ship_indices = [i for i, (_, label) in enumerate(full_dataset) if label == 8]
+ship_dataset = torch.utils.data.Subset(full_dataset, ship_indices)
+
+# Cargador de datos con la clase filtrada
+dataloader = DataLoader(ship_dataset, batch_size=batch_size, shuffle=True)
+
+print(f"Entrenamiento configurado solo para BARCOS (Clase 8).")
+print(f"Total de imágenes de entrenamiento: {len(ship_dataset)}")
 # -----------------------------
 # 4. Instanciar Modelos
 # -----------------------------
@@ -129,16 +137,16 @@ for epoch in range(num_epochs):
         
         # Guardar imagen en carpeta cada 10 épocas
         if (epoch + 1) % 10 == 0:
-            utils.save_image(fake_display, f'{samples_dir}/epoch_{epoch+1}.png', normalize=True)
+            utils.save_image(fake_display, f'{samples_dir}/barco_epoch_{epoch+1}.png', normalize=True)
 
     # GUARDADO DE CHECKPOINTS (Tu sistema de seguridad)
     
     # 1. El último estado (siempre se sobreescribe)
-    torch.save(G.state_dict(), os.path.join(model_dir, 'generator_latest.pth'))
+    torch.save(G.state_dict(), os.path.join(model_dir, 'generator_ship_latest.pth'))
     
     # 2. Checkpoint Histórico (Cada 50 épocas, no se sobreescribe)
     if (epoch + 1) % 50 == 0:
-        cp_name = f'generator_epoch_{epoch+1}.pth'
+        cp_name = f'generador_barco_epoch_{epoch+1}.pth'
         torch.save({
             'epoch': epoch + 1,
             'model_state_dict': G.state_dict(),
