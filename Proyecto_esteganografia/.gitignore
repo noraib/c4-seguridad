@@ -1,10 +1,14 @@
-# Ignorar el dataset descargado
+# Datasets
+*.tar.gz
+cifar-10-batches-py/
 data/
-../data/
 
-# Ignorar las carpetas de caché de Python
+# Python cache
 __pycache__/
 *.pyc
+
+# Environments
+.venv/
 
 # Ignorar TODAS las imágenes generadas y de muestra
 imagenes_generadas/*.png
@@ -12,8 +16,9 @@ muestras_entrenamiento/*.png
 
 # Ignorar TODOS los modelos guardados...
 modelos/*.pth
-# ... ¡EXCEPTO el último modelo!
+# ... ¡EXCEPTO el último modelo para que el proyecto sea ejecutable al clonar!
 !modelos/latest_generator.pth
 
-# Ignorar imagenes generadas
+# Ignorar imagenes generadas para esteganografía
 imagenes_esteganografia/*.png
+
