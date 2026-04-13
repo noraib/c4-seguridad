@@ -164,6 +164,6 @@ for epoch in range(starting_epoch, new_total_epochs):
         torch.save(netG.state_dict(), os.path.join(model_dir, f'gen_v2_epoch_{epoch_idx}.pth'))
         print(f" >>> Checkpoint {epoch_idx} guardado.")
 
-    print(f"Época [{epoch_idx}/{num_epochs}] Loss D: {lossD.item():.4f} | Loss G: {lossG.item():.4f}")
+    print(f"Época [{epoch_idx}/{new_total_epochs}] Loss D: {lossD.item():.4f} | Loss G: {lossG.item():.4f}")
 
 writer.close()
