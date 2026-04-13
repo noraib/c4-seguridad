@@ -62,3 +62,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+#USO (ejemplos):
+#python Proyecto_esteganografia/src/run.py train-v2
+#python Proyecto_esteganografia/src/run.py generate-v2
+#python Proyecto_esteganografia/src/run.py full
