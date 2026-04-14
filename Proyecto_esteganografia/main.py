@@ -12,7 +12,8 @@ OPTIONS = {
     "1": ("Generar imágenes con GAN", GAN_DIR / "generador_de_imagenesV2.py"),
     "2": ("Ocultar mensaje en imagen (Encriptar)", SRC_DIR / "ocultar.py"),
     "3": ("Extraer mensaje de imagen (Desencriptar)", SRC_DIR / "extraer.py"),
-    "4": ("Salir", None)
+    "4": ("Procesamiento masivo (CSV -> Imágenes + Keys)", SRC_DIR / "procesador_masivo.py"),
+    "5": ("Salir", None)
 }
 
 def run_script(path: Path):
@@ -42,7 +43,7 @@ def main():
 
         choice = input("\nSelecciona una opción: ").strip()
 
-        if choice == "4":
+        if choice == "5":
             print("Saliendo... ¡Hasta pronto!")
             break
 
