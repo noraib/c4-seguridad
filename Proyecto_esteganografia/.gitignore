@@ -26,5 +26,6 @@ modelos_v2_barcos/*.pth
 !modelos/latest_generator.pth
 
 # Ignorar imagenes generadas para esteganografía
-imagenes_esteganografia/*.png
+imagenes_esteganografia/
+media_cripto_esteg/
 
