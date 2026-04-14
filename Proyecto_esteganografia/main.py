@@ -2,7 +2,7 @@ import subprocess
 import sys
 import os
 from pathlib import Path
-from proteger_csv import cambiar_estado_csv 
+from src.proteger_csv import cambiar_estado_csv 
 
 BASE_DIR = Path(__file__).resolve().parent
 SRC_DIR = BASE_DIR / "src"
@@ -15,7 +15,7 @@ OPTIONS = {
     "2": ("Ocultar mensaje en imagen (Encriptar)", "script"),
     "3": ("Extraer mensaje de imagen (Desencriptar)", "script"),
     "4": ("Procesamiento masivo (CSV -> Imágenes + Keys)", "script"),
-    "5": ("Caja Fuerte (Bloquear/Desbloquear Reporte)", "funcion"),
+    "5": ("Caja Fuerte (Bloquear contenido/Desbloquear contenido/Obtener clave)", "funcion"),
     "6": ("Salir", None), 
 }
 
@@ -27,6 +27,7 @@ SCRIPT_PATHS = {
     "4": SRC_DIR / "procesador_masivo.py",
 }
 
+
 # bloquear / desbloquear csv
 def menu_proteccion():
     print("\n" + "-"*30)
@@ -34,10 +35,11 @@ def menu_proteccion():
     print("-"*30)
     print("1. Bloquear (Cifrar contenido)")
     print("2. Desbloquear (Descifrar contenido)")
-    print("3. Volver atrás")
+    print("3. Obtener Clave")
+    print("4. Volver atrás")
     
     op = input("\nSelecciona una opción: ")
-    if op == "3": return
+    if op == "4": return
 
     pwd = input("Introduce la Contraseña Maestra: ")
 
@@ -45,6 +47,8 @@ def menu_proteccion():
         cambiar_estado_csv(PATH_CSV_REPORTE, pwd, "bloquear")
     elif op == "2":
         cambiar_estado_csv(PATH_CSV_REPORTE, pwd, "desbloquear")
+    elif op == "3":
+        cambiar_estado_csv(PATH_CSV_REPORTE, pwd, "obtener")
     else:
         print("Opción no válida.")
 
