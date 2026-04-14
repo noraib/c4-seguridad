@@ -3,36 +3,41 @@ import sys
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
-GAN_DIR = BASE_DIR / "gan"
+SCRIPTS_DIR = BASE_DIR 
 
 OPTIONS = {
-    "1": ("Entrenar GAN V1", GAN_DIR / "entrenamiento.py"),
-    "2": ("Entrenar GAN V2", GAN_DIR / "entrenamiento_v2.py"),
-    "3": ("Generar imágenes V1", GAN_DIR / "generador_de_imagenes.py"),
-    "4": ("Generar imágenes V2", GAN_DIR / "generador_de_imagenesV2.py"),
-    "5": ("Probar generador", GAN_DIR / "generator_main.py"),
-    "6": ("Probar discriminador", GAN_DIR / "discriminator_main.py"),
-    "7": ("Test AES", BASE_DIR / "test_aes.py"),
-    "8": ("Test AES + Esteganografía", BASE_DIR / "test_aes+esteg.py"),
+    "1": ("Generar imágenes con GAN", BASE_DIR / "gan" / "generador_de_imagenesV2.py"),
+    "2": ("Ocultar mensaje en imagen (Encriptar)", SCRIPTS_DIR / "ocultar.py"),
+    "3": ("Extraer mensaje de imagen (Desencriptar)", SCRIPTS_DIR / "extraer.py"),
+    "4": ("Salir", None)
 }
 
 def run_script(path: Path):
-    print(f"\n>>> Ejecutando {path.name}\n")
-    subprocess.run([sys.executable, str(path)], check=True)
+    try:
+        print(f"\n>>> Ejecutando {path.name}...\n")
+        subprocess.run([sys.executable, str(path)], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"\n[!] Error al ejecutar el script: {e}")
+    except Exception as e:
+        print(f"\n[!] Ocurrió un error inesperado: {e}")
 
 def main():
-    print("Selecciona una opción:\n")
-    for key, (label, _) in OPTIONS.items():
-        print(f"{key}. {label}")
+    while True:
+        print("\n=== SISTEMA DE CRIPTO-ESTEGANOGRAFÍA ===")
+        for key, (label, _) in OPTIONS.items():
+            print(f"{key}. {label}")
 
-    choice = input("\nOpción: ").strip()
+        choice = input("\nSelecciona una opción: ").strip()
 
-    if choice not in OPTIONS:
-        print("Opción no válida.")
-        sys.exit(1)
+        if choice == "4":
+            print("Saliendo...")
+            break
 
-    _, script_path = OPTIONS[choice]
-    run_script(script_path)
+        if choice in OPTIONS:
+            label, script_path = OPTIONS[choice]
+            run_script(script_path)
+        else:
+            print("Opción no válida. Intenta de nuevo.")
 
 if __name__ == "__main__":
     main()

@@ -10,7 +10,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"
 try:
     from src.gan.GeneratorV2 import GeneratorV2 as Generator 
 except ImportError:
-    print("❌ Error: No se pudo encontrar Generator.py. Asegúrate de que la estructura de carpetas es correcta.")
+    print("Error: No se pudo encontrar Generator.py. Asegúrate de que la estructura de carpetas es correcta.")
     sys.exit()
 
 # --- CONFIGURACIÓN DE TU REPOSITORIO ---
@@ -27,10 +27,10 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # 2. DESCARGA AUTOMÁTICA
 try:
-    print(f"⏳ Descargando pesos desde Hugging Face ({REPO_ID})...")
+    print(f"Descargando pesos desde Hugging Face ({REPO_ID})...")
     model_path = hf_hub_download(repo_id=REPO_ID, filename=FILENAME)
 except Exception as e:
-    print(f"❌ Error al conectar con Hugging Face: {e}")
+    print(f"Error al conectar con Hugging Face: {e}")
     sys.exit()
 
 # 3. CARGAR EL MODELO
@@ -46,7 +46,7 @@ else:
 # 4. GENERACIÓN (Modo train para evitar el gris)
 netG.train() 
 
-print(f"🚀 Generando {NUM_IMAGES} barcos para esteganografía...")
+print(f"Generando {NUM_IMAGES} barcos para esteganografía...")
 
 with torch.no_grad():
     noise = torch.randn(NUM_IMAGES, Z_DIM, 1, 1, device=device)

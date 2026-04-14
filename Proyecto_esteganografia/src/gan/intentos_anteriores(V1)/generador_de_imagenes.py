@@ -6,7 +6,7 @@ from huggingface_hub import hf_hub_download
 
 # Ajuste de ruta
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
-from src.gan.Generator import Generator 
+from Generator import Generator 
 
 # --- CONFIGURACIÓN PARA V1 ---
 REPO_ID = "Gonzatorra/Seguridad_BarcoV1_Epoch450" 
