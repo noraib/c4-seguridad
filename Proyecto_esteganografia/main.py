@@ -2,19 +2,51 @@ import subprocess
 import sys
 import os
 from pathlib import Path
+from proteger_csv import cambiar_estado_csv 
 
 BASE_DIR = Path(__file__).resolve().parent
 SRC_DIR = BASE_DIR / "src"
 GAN_DIR = SRC_DIR / "gan"
+PATH_CSV_REPORTE = "media_cripto_esteg/procesado_masivo/reporte_claves_final.csv"
 
-# El diccionario con tus rutas lindas
+# El diccionario de las opciones
 OPTIONS = {
-    "1": ("Generar imágenes con GAN", GAN_DIR / "generador_de_imagenesV2.py"),
-    "2": ("Ocultar mensaje en imagen (Encriptar)", SRC_DIR / "ocultar.py"),
-    "3": ("Extraer mensaje de imagen (Desencriptar)", SRC_DIR / "extraer.py"),
-    "4": ("Procesamiento masivo (CSV -> Imágenes + Keys)", SRC_DIR / "procesador_masivo.py"),
-    "5": ("Salir", None)
+    "1": ("Generar imágenes con GAN", "script"),
+    "2": ("Ocultar mensaje en imagen (Encriptar)", "script"),
+    "3": ("Extraer mensaje de imagen (Desencriptar)", "script"),
+    "4": ("Procesamiento masivo (CSV -> Imágenes + Keys)", "script"),
+    "5": ("Caja Fuerte (Bloquear/Desbloquear Reporte)", "funcion"),
+    "6": ("Salir", None), 
 }
+
+# Rutas para los scripts
+SCRIPT_PATHS = {
+    "1": GAN_DIR / "generador_de_imagenesV2.py",
+    "2": SRC_DIR / "ocultar.py",
+    "3": SRC_DIR / "extraer.py",
+    "4": SRC_DIR / "procesador_masivo.py",
+}
+
+# bloquear / desbloquear csv
+def menu_proteccion():
+    print("\n" + "-"*30)
+    print("   CAJA FUERTE DEL REPORTE")
+    print("-"*30)
+    print("1. Bloquear (Cifrar contenido)")
+    print("2. Desbloquear (Descifrar contenido)")
+    print("3. Volver atrás")
+    
+    op = input("\nSelecciona una opción: ")
+    if op == "3": return
+
+    pwd = input("Introduce la Contraseña Maestra: ")
+
+    if op == "1":
+        cambiar_estado_csv(PATH_CSV_REPORTE, pwd, "bloquear")
+    elif op == "2":
+        cambiar_estado_csv(PATH_CSV_REPORTE, pwd, "desbloquear")
+    else:
+        print("Opción no válida.")
 
 def run_script(path: Path):
     if not path or not path.exists():
@@ -43,13 +75,19 @@ def main():
 
         choice = input("\nSelecciona una opción: ").strip()
 
-        if choice == "5":
+        if choice == "6":
             print("Saliendo... ¡Hasta pronto!")
             break
 
         if choice in OPTIONS:
-            _, script_path = OPTIONS[choice]
-            run_script(script_path)
+            tipo = OPTIONS[choice][1]
+            
+            if tipo == "script":
+                script_path = SCRIPT_PATHS[choice]
+                run_script(script_path)
+            elif tipo == "funcion":
+                # Llama a la logica de cifrar/descifrar csv
+                menu_proteccion()
         else:
             print("Opción no válida. Intenta de nuevo.")
 

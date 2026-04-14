@@ -1,7 +1,3 @@
-# Datasets
-*.tar.gz
-cifar-10-batches-py/
-
 # Python cache
 __pycache__/
 *.pyc
@@ -11,21 +7,7 @@ __pycache__/
 .venv/
 .vscode/
 
-# Ignorar TODAS las imágenes generadas y de muestra
-imagenes_generadas/*.png
-muestras_entrenamiento/
-muestras_entrenamiento_barcos/
-muestras_entrenamiento_barcos_v2/
-
-
-# Ignorar TODOS los modelos guardados...
-modelos/*.pth
-modelos_v2_barcos/*.pth
-
-# ... ¡EXCEPTO el último modelo para que el proyecto sea ejecutable al clonar!
-!modelos/latest_generator.pth
 
 # Ignorar imagenes generadas para esteganografía
 imagenes_esteganografia/
 media_cripto_esteg/
-
