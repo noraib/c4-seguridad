@@ -2,17 +2,11 @@
 from tkinter import Tk, filedialog
 from cripto.aes import decrypt_message
 from esteganografia.lsb import decode_lsb
-
-def select_file():
-    root = Tk()
-    root.withdraw()
-    path = filedialog.askopenfilename(title="Selecciona la imagen con esteganografía")
-    root.destroy()
-    return path
+from src.utils import select_file
 
 def main():
     print("--- EXTRAER MENSAJE ---")
-    img_path = select_file()
+    img_path = select_file("Selecciona la imagen con esteganografía")
     if not img_path: return
 
     hex_key = input("Introduce la clave (HEX): ").strip()

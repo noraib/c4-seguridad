@@ -2,34 +2,15 @@ import os
 from pathlib import Path
 from cripto.aes import generate_key, encrypt_message
 from esteganografia.lsb import encode_lsb
+from src.utils import select_file
 
-def select_file():
-    """Abre la ventana para elegir el archivo."""
-    try:
-        import tkinter as tk
-        from tkinter import filedialog
-        
-        root = tk.Tk()
-        root.withdraw()  # Oculta la ventanita negra de fondo
-        root.attributes("-topmost", True)  # Fuerza la ventana al frente
-        
-        print("[*] Selecciona la imagen en la ventana que ha aparecido...")
-        path = filedialog.askopenfilename(
-            title="Selecciona la imagen base de tu GAN",
-            filetypes=[("Imágenes", "*.png *.jpg *.jpeg")]
-        )
-        root.destroy()
-        return path
-    except Exception as e:
-        print(f"\n[!] No se pudo abrir el selector visual: {e}")
-        return input("[?] Introduce la ruta manualmente: ").strip()
 
 def main():
     print("\n" + "─"*40)
     print("      OCULTAR MENSAJE")
     print("─"*40)
     
-    img_input = select_file()
+    img_input = select_file("Selecciona la imagen en la ventana que ha aparecido...")
     
     # --- Limpieza de rutas de WSL/Windows ---
     if img_input:
