@@ -3,6 +3,12 @@ import sys
 import os
 from pathlib import Path
 from src.proteger_csv import cambiar_estado_csv 
+try:
+    from tkinter import Tk, filedialog
+except ImportError:
+    print("Error: tkinter no está instalado.")
+    print("Instálalo con: sudo apt install python3-tk")
+    exit(1)
 
 BASE_DIR = Path(__file__).resolve().parent
 SRC_DIR = BASE_DIR / "src"

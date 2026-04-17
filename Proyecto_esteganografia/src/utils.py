@@ -1,4 +1,3 @@
-
 def select_file(frase):
     """Abre la ventana para elegir el archivo."""
     try:
