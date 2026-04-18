@@ -5,6 +5,8 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from src.utils import select_file
+from cripto.aes import decrypt_message
+from esteganografia.lsb import decode_lsb
 
 def obtener_llave(password: str):
     """Genera la llave maestra necesaria para transformar los datos."""
@@ -66,8 +68,8 @@ def cambiar_estado_csv(ruta_archivo, password, modo):
         print(f"❌ No se encuentra el archivo: {ruta_archivo}")
         return
 
-    # Si está bloqueado, solo se puede desbloquear
-    if esta_bloqueado(ruta_archivo) and modo != "desbloquear":
+    # Si está bloqueado, solo se puede desbloquear u obtener
+    if esta_bloqueado(ruta_archivo) and modo not in ("desbloquear", "obtener"):
         print("\n⛔ El archivo está BLOQUEADO. Primero debes desbloquearlo (opción 2).")
         return
 
@@ -94,7 +96,7 @@ def cambiar_estado_csv(ruta_archivo, password, modo):
             bloquear(fernet, datos_actuales, ruta_archivo)
             
         elif modo == "desbloquear":
-            # Reintentos para evitar que el archivo quede bloqueado por olvido
+            # --- PUNTO 4: Reintentos para evitar que el archivo quede bloqueado por olvido ---
             MAX_INTENTOS = 3
             exito = desbloquear(fernet, datos_actuales, ruta_archivo)
             intentos = 1
@@ -110,40 +112,58 @@ def cambiar_estado_csv(ruta_archivo, password, modo):
                 exito = desbloquear(fernet, datos_actuales, ruta_archivo)
                 intentos += 1
             if not exito:
-                print("\n⚠️  Se agotaron los intentos. El archivo sigue BLOQUEADO pero intacto;")
-                print("    podrás volver a intentarlo cuando recuerdes la contraseña.")
+                print("\n⚠️  Se agotaron los 3 intentos. El archivo sigue BLOQUEADO pero intacto.")
+                print("    Volviendo al menú...")
             
         else: 
-            # Primero se abre
-            desbloquear(fernet, datos_actuales, ruta_archivo)
-            
-            # Luego se obtiene la clave
-            path = select_file("Elige de que archivo se quiere obtener la clave: ")
+            # Obtener y mostrar el chiste descifrado
+            # 1. Desbloquear el CSV temporalmente
+            if not desbloquear(fernet, datos_actuales, ruta_archivo):
+                return  # contraseña incorrecta, el CSV sigue bloqueado intacto
+
+            # 2. Pedir al usuario la imagen estego
+            path = select_file("Elige la imagen de la que quieres obtener el chiste:")
+            if not path:
+                print("❌ No se seleccionó ninguna imagen.")
+                # Volvemos a bloquear con los datos en claro (los que acabamos de escribir)
+                with open(ruta_archivo, "rb") as f:
+                    datos_claros = f.read()
+                bloquear(fernet, datos_claros, ruta_archivo)
+                return
+
             nombre_archivo = os.path.basename(path)
 
-            clave_encontrada = None
-
-            ## Abrir y buscar en el CSV
+            # 3. Buscar la clave AES correspondiente en el CSV
+            clave_hex = None
             try:
                 with open(ruta_archivo, mode='r', encoding='utf-8') as f:
                     reader = csv.DictReader(f)
                     for fila in reader:
                         if fila['imagen_estego'] == nombre_archivo:
-                            clave_encontrada = fila['clave_aes_hex']
+                            clave_hex = fila['clave_aes_hex']
                             break
 
-                ## Resultado
-                if clave_encontrada:
-                    print(f"✅ Clave encontrada para {nombre_archivo}:")
-                    print(clave_encontrada)
+                # 4. Extraer y descifrar el chiste de la imagen
+                if clave_hex:
+                    try:
+                        clave_aes = bytes.fromhex(clave_hex)
+                        ciphertext = decode_lsb(path)
+                        chiste = decrypt_message(ciphertext, clave_aes)
+                        print(f"\n😂 CHISTE de {nombre_archivo}:")
+                        print(f"   {chiste}")
+                    except Exception as e:
+                        print(f"❌ Error al descifrar la imagen: {e}")
                 else:
-                    print(f"❌ No se encontró la clave para el archivo: {nombre_archivo}")
+                    print(f"❌ No se encontró una clave para el archivo: {nombre_archivo}")
 
             except FileNotFoundError:
                 print("Error: No se encontró el archivo CSV de base de datos.")
-            
+
             finally:
-                bloquear(fernet, datos_actuales, ruta_archivo)
+                # 5. Volver a bloquear el CSV con los datos en claro (no con ciphertext)
+                with open(ruta_archivo, "rb") as f:
+                    datos_claros = f.read()
+                bloquear(fernet, datos_claros, ruta_archivo)
                 
     except FileNotFoundError:
                 print("Error: No se encontró el archivo CSV de base de datos.")
