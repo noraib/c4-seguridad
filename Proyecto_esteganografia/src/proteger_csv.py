@@ -64,9 +64,9 @@ def cambiar_estado_csv(ruta_archivo, password, modo):
         print(f"❌ No se encuentra el archivo: {ruta_archivo}")
         return
 
-    # Si está bloqueado, no se puede volver a bloquear
-    if modo == "bloquear" and esta_bloqueado(ruta_archivo):
-        print("\n⛔ El archivo ya está BLOQUEADO. Primero debes desbloquearlo (opción 2).")
+    # Si está bloqueado, solo se puede desbloquear
+    if esta_bloqueado(ruta_archivo) and modo != "desbloquear":
+        print("\n⛔ El archivo está BLOQUEADO. Primero debes desbloquearlo (opción 2).")
         return
 
     llave = obtener_llave(password)
