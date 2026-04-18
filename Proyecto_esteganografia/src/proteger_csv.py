@@ -54,8 +54,10 @@ def desbloquear(fernet, datos_actuales, ruta_archivo):
         with open(ruta_archivo, "wb") as f:
             f.write(datos_nuevos)
         print(f"\n✅ {confirmacion}")
+        return True
     except Exception:
         print("\n❌ ERROR: Contraseña incorrecta o el archivo ya está en ese estado.")
+        return False
 
 
 def cambiar_estado_csv(ruta_archivo, password, modo):
@@ -92,7 +94,24 @@ def cambiar_estado_csv(ruta_archivo, password, modo):
             bloquear(fernet, datos_actuales, ruta_archivo)
             
         elif modo == "desbloquear":
-            desbloquear(fernet, datos_actuales, ruta_archivo)
+            # Reintentos para evitar que el archivo quede bloqueado por olvido
+            MAX_INTENTOS = 3
+            exito = desbloquear(fernet, datos_actuales, ruta_archivo)
+            intentos = 1
+            while not exito and intentos < MAX_INTENTOS:
+                restantes = MAX_INTENTOS - intentos
+                print(f"   Te quedan {restantes} intento(s).")
+                nueva_pwd = input("Introduce la Contraseña Maestra de nuevo: ")
+                if not nueva_pwd:
+                    print("\n⛔ Debes introducir una contraseña.")
+                    intentos += 1
+                    continue
+                fernet = Fernet(obtener_llave(nueva_pwd))
+                exito = desbloquear(fernet, datos_actuales, ruta_archivo)
+                intentos += 1
+            if not exito:
+                print("\n⚠️  Se agotaron los intentos. El archivo sigue BLOQUEADO pero intacto;")
+                print("    podrás volver a intentarlo cuando recuerdes la contraseña.")
             
         else: 
             # Primero se abre
