@@ -74,6 +74,11 @@ def cambiar_estado_csv(ruta_archivo, password, modo):
         print("\n⛔ El archivo está DESBLOQUEADO. Primero debes bloquearlo (opción 1).")
         return
 
+    # Antes de desbloquear, comprobar que se ha introducido una clave
+    if modo == "desbloquear" and not password:
+        print("\n⛔ Debes introducir una contraseña para desbloquear el archivo.")
+        return
+
     llave = obtener_llave(password)
     fernet = Fernet(llave)
 
