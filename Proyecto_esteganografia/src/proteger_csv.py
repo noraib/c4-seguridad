@@ -16,6 +16,20 @@ def obtener_llave(password: str):
     )
     return base64.urlsafe_b64encode(kdf.derive(password.encode()))
 
+def esta_bloqueado(ruta_archivo):
+    """
+    Comprueba si el archivo CSV está cifrado (bloqueado) o en claro (desbloqueado).
+    Un token Fernet siempre empieza por 'gAAAAA' (byte de versión 0x80 + timestamp).
+    Un CSV en claro empieza por la cabecera 'id_chiste,...'.
+    Devuelve True si está bloqueado, False si está desbloqueado.
+    """
+    try:
+        with open(ruta_archivo, "rb") as f:
+            inicio = f.read(6)
+        return inicio == b"gAAAAA"
+    except Exception:
+        return False
+
 def bloquear(fernet, datos_actuales, ruta_archivo):
     try:
         # Convertimos el texto en 'basura' ilegible
@@ -48,6 +62,11 @@ def cambiar_estado_csv(ruta_archivo, password, modo):
     """Lee, transforma y sobrescribe el archivo original."""
     if not os.path.exists(ruta_archivo):
         print(f"❌ No se encuentra el archivo: {ruta_archivo}")
+        return
+
+    # Si está bloqueado, no se puede volver a bloquear
+    if modo == "bloquear" and esta_bloqueado(ruta_archivo):
+        print("\n⛔ El archivo ya está BLOQUEADO. Primero debes desbloquearlo (opción 2).")
         return
 
     llave = obtener_llave(password)
