@@ -1,7 +1,7 @@
 # extraer.py
 from tkinter import Tk, filedialog
-from cripto.aes import decrypt_message
-from esteganografia.lsb import decode_lsb
+from src.cripto.aes import decrypt_message
+from src.esteganografia.lsb import decode_lsb
 from src.utils import select_file
 
 def main():

@@ -5,8 +5,8 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from src.utils import select_file
-from cripto.aes import decrypt_message
-from esteganografia.lsb import decode_lsb
+from src.cripto.aes import decrypt_message
+from src.esteganografia.lsb import decode_lsb
 
 def obtener_llave(password: str):
     """Genera la llave maestra necesaria para transformar los datos."""

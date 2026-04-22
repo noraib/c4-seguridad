@@ -1,8 +1,8 @@
 import csv
 import os
 from pathlib import Path
-from cripto.aes import generate_key, encrypt_message
-from esteganografia.lsb import encode_lsb
+from src.cripto.aes import generate_key, encrypt_message
+from src.esteganografia.lsb import encode_lsb
 
 def procesar_mision_esteganografica(csv_entrada, carpeta_gan, carpeta_salida):
     # Configuración de rutas

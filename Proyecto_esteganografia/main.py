@@ -21,7 +21,7 @@ OPTIONS = {
     "2": ("Ocultar mensaje en imagen (Encriptar)", "script"),
     "3": ("Extraer mensaje de imagen (Desencriptar)", "script"),
     "4": ("Procesamiento masivo (CSV -> Imágenes + Keys)", "script"),
-    "5": ("Caja Fuerte (Bloquear contenido/Desbloquear contenido/Obtener clave)", "funcion"),
+    "5": ("Caja Fuerte (Bloquear contenido/Desbloquear contenido/Obtener chiste)", "funcion"),
     "6": ("Salir", None), 
 }
 
@@ -41,7 +41,7 @@ def menu_proteccion():
     print("-"*30)
     print("1. Bloquear (Cifrar contenido)")
     print("2. Desbloquear (Descifrar contenido)")
-    print("3. Obtener Clave")
+    print("3. Obtener chiste")
     print("4. Volver atrás")
     
     op = input("\nSelecciona una opción: ")
