@@ -92,6 +92,50 @@ sudo apt install python3-tk
     ```
 5.  Aparecerá el menú interactivo. Simplemente introduce el número de la opción que deseas ejecutar y sigue las instrucciones en pantalla.
 
+
+---
+
+## Funcionalidades incluidas
+
+
+### 1. Generación de Imágenes (GAN)
+El sistema utiliza una Red Neuronal Generativa (GAN) para crear imágenes de barcos desde cero. Estas imágenes son ideales para la esteganografía porque, al ser sintéticas, no existe una "imagen original" en internet con la que un analista pueda comparar para detectar alteraciones en los píxeles.
+
+### 2. Ocultar y Extraer (El núcleo)
+* **Cifrado:** Antes de ocultar nada, el texto se cifra con **AES-256** en modo Fernet. Esto garantiza que aunque alguien sospeche que hay algo en la imagen y logre extraer los bits, solo verá datos aleatorios.
+* **Inserción LSB:** El mensaje cifrado se descompone en bits. Estos bits sustituyen el último bit de los canales Rojo, Verde y Azul de cada píxel. 
+
+### 3. Procesamiento Masivo
+Diseñado para flujos de trabajo de datos. 
+- **Entrada:** Un archivo `CSV` con una lista de textos (ej. chistes).
+- **Acción:** El sistema toma una imagen única de la carpeta GAN para cada texto, realiza el proceso de cifrado/ocultación y guarda el resultado.
+- **Salida:** Una carpeta con imágenes esteganográficas y un `reporte_claves_final.csv` que vincula cada imagen con su clave de descifrado.
+
+### 4. Caja Fuerte
+Para evitar que el archivo de claves (`reporte_claves_final.csv`) caiga en manos equivocadas, este módulo permite:
+- **Bloquear:** Cifra el CSV completo usando una **Contraseña Maestra** definida por el usuario.
+- **Desbloquear:** Restaura el acceso al CSV original.
+- **Detección de estado:** El sistema detecta automáticamente si el archivo ya está cifrado para evitar el "doble cifrado" que corrompería los datos.
+- **Obtener chiste:** Obtiene el chiste almacenado en una de las imágenes procesadas masivamente.
+---
+
+## Especificaciones Técnicas
+
+### El Algoritmo LSB (Least Significant Bit)
+La modificación del bit menos significativo es una técnica donde el cambio en el valor del color es de máximo **1 unidad** (sobre 255). 
+
+### Seguridad Criptográfica
+- **Cifrado de Mensajes:** AES-256 (Fernet).
+- **Derivación de Clave Maestra:** Se utiliza **PBKDF2HMAC** con SHA256 y un *salt* de 100,000 iteraciones para transformar tu contraseña simple en una clave criptográfica robusta.
+
+---
+
+## Directorios de interés
+
+El sistema organiza automáticamente tus archivos en la carpeta `media_cripto_esteg/`:
+* `output/`: Aquí aparecerán tus imágenes con mensajes ocultos (`stego_result.png`).
+* `procesado_masivo/`: Contiene los reportes de claves y las imágenes generadas masivamente.
+
 ---
 
 
