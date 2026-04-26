@@ -10,14 +10,19 @@ def main():
     if not img_path: return
 
     hex_key = input("Introduce la clave (HEX): ").strip()
-    key = bytes.fromhex(hex_key)
-
     try:
-        extracted = decode_lsb(img_path)
-        decrypted = decrypt_message(extracted, key)
-        print(f"\n🔓 MENSAJE RECUPERADO: {decrypted}")
-    except Exception as e:
-        print(f"\n❌ Error: No se pudo descifrar. ¿La clave es correcta?")
+        key = bytes.fromhex(hex_key)
+        try:
+            extracted = decode_lsb(img_path)
+            decrypted = decrypt_message(extracted, key)
+            print(f"\n🔓 MENSAJE RECUPERADO: {decrypted}")
+        except Exception as e:
+            print(f"\n❌ Error: No se pudo descifrar. ¿La clave es correcta?")
+    except ValueError:
+        print("[!] La clave debe estar en formato hexadecimal")
+        return
+
+
 
 if __name__ == "__main__":
     main()

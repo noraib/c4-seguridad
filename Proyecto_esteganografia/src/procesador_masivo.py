@@ -23,7 +23,7 @@ def procesar_mision_esteganografica(csv_entrada, carpeta_gan, carpeta_salida):
     imagenes_disponibles = sorted(list(Path(carpeta_gan).glob("*.png")))
     
     if len(imagenes_disponibles) < len(chistes):
-        print(f"⚠️ Alerta: Tienes {len(chistes)} chistes pero solo {len(imagenes_disponibles)} imágenes en la carpeta GAN. Genera más imagenes para poder completar la encriptación.")
+        print(f" [!] Alerta: Tienes {len(chistes)} chistes pero {len(imagenes_disponibles)} imágenes en la carpeta GAN. Genera más imagenes para poder completar la encriptación.")
         return
 
     # 3. Procesar y Generar CSV de salida

@@ -62,29 +62,23 @@ def desbloquear(fernet, datos_actuales, ruta_archivo):
         return False
 
 
-def cambiar_estado_csv(ruta_archivo, password, modo):
+def cambiar_estado_csv(ruta_archivo,modo):
     """Lee, transforma y sobrescribe el archivo original."""
     if not os.path.exists(ruta_archivo):
-        print(f"❌ No se encuentra el archivo: {ruta_archivo}")
+        print(f"❌ No se encuentra el archivo a bloquear. \nPrimero debes generarlo (función 4)")
         return
 
     # Si está bloqueado, solo se puede desbloquear u obtener
-    if esta_bloqueado(ruta_archivo) and modo not in ("desbloquear", "obtener"):
+    if esta_bloqueado(ruta_archivo) and modo == "bloquear":
         print("\n⛔ El archivo está BLOQUEADO. Primero debes desbloquearlo (opción 2).")
         return
 
     # Si está desbloqueado, solo se puede bloquear
-    if not esta_bloqueado(ruta_archivo) and modo != "bloquear":
+    if not esta_bloqueado(ruta_archivo) and modo == "desbloquear":
         print("\n⛔ El archivo está DESBLOQUEADO. Primero debes bloquearlo (opción 1).")
         return
 
-    # Antes de desbloquear, comprobar que se ha introducido una clave
-    if not password:
-        print("\n⛔ Debes introducir una contraseña.")
-        return
 
-    llave = obtener_llave(password)
-    fernet = Fernet(llave)
 
     try:
         # 1. Leer el contenido actual del CSV (sea texto o cifrado)
@@ -93,10 +87,24 @@ def cambiar_estado_csv(ruta_archivo, password, modo):
 
         # 2. Aplicar la transformación
         if modo == "bloquear":
+            password = input("Introduce la Contraseña Maestra: ")
+            # Antes de desbloquear, comprobar que se ha introducido una clave
+            if not password:
+                print("\n⛔ Debes introducir una contraseña.")
+                return
+            llave = obtener_llave(password)
+            fernet = Fernet(llave)
             bloquear(fernet, datos_actuales, ruta_archivo)
             
         elif modo == "desbloquear":
             # --- PUNTO 4: Reintentos para evitar que el archivo quede bloqueado por olvido ---
+            password = input("Introduce la Contraseña Maestra: ")
+            # Antes de desbloquear, comprobar que se ha introducido una clave
+            if not password:
+                print("\n⛔ Debes introducir una contraseña.")
+                return
+            llave = obtener_llave(password)
+            fernet = Fernet(llave)
             MAX_INTENTOS = 3
             exito = desbloquear(fernet, datos_actuales, ruta_archivo)
             intentos = 1
@@ -105,7 +113,7 @@ def cambiar_estado_csv(ruta_archivo, password, modo):
                 print(f"   Te quedan {restantes} intento(s).")
                 nueva_pwd = input("Introduce la Contraseña Maestra de nuevo: ")
                 if not nueva_pwd:
-                    print("\n⛔ Debes introducir una contraseña.")
+                    print("\n⛔ Debes introducir la contraseña.")
                     intentos += 1
                     continue
                 fernet = Fernet(obtener_llave(nueva_pwd))
@@ -118,8 +126,17 @@ def cambiar_estado_csv(ruta_archivo, password, modo):
         else: 
             # Obtener y mostrar el chiste descifrado
             # 1. Desbloquear el CSV temporalmente
-            if not desbloquear(fernet, datos_actuales, ruta_archivo):
-                return  # contraseña incorrecta, el CSV sigue bloqueado intacto
+            if esta_bloqueado(ruta_archivo):
+                password = input("Introduce la Contraseña Maestra: ")
+                # Antes de desbloquear, comprobar que se ha introducido una clave
+                if not password:
+                    print("\n⛔ Debes introducir una contraseña.")
+                    return
+                llave = obtener_llave(password)
+                fernet = Fernet(llave)
+                
+                if not desbloquear(fernet, datos_actuales, ruta_archivo):
+                    return  # contraseña incorrecta, el CSV sigue bloqueado intacto
 
             # 2. Pedir al usuario la imagen estego
             path = select_file("Elige la imagen de la que quieres obtener el chiste:")
@@ -149,7 +166,7 @@ def cambiar_estado_csv(ruta_archivo, password, modo):
                         clave_aes = bytes.fromhex(clave_hex)
                         ciphertext = decode_lsb(path)
                         chiste = decrypt_message(ciphertext, clave_aes)
-                        print(f"\n😂 CHISTE de {nombre_archivo}:")
+                        print(f"\nChiste de {nombre_archivo}:")
                         print(f"   {chiste}")
                     except Exception as e:
                         print(f"❌ Error al descifrar la imagen: {e}")
@@ -163,7 +180,19 @@ def cambiar_estado_csv(ruta_archivo, password, modo):
                 # 5. Volver a bloquear el CSV con los datos en claro (no con ciphertext)
                 with open(ruta_archivo, "rb") as f:
                     datos_claros = f.read()
-                bloquear(fernet, datos_claros, ruta_archivo)
+                
+                if not esta_bloqueado(ruta_archivo):
+                    password = input("Introduce la Contraseña Maestra: ")
+                    # Antes de desbloquear, comprobar que se ha introducido una clave
+                    if not password:
+                        print("\n⛔ Debes introducir una contraseña.")
+                        return
+                    llave = obtener_llave(password)
+                    fernet = Fernet(llave)
+                    
+                    if not bloquear(fernet, datos_claros, ruta_archivo):
+                        return  # contraseña incorrecta, el CSV sigue bloqueado intacto
+
                 
     except FileNotFoundError:
                 print("Error: No se encontró el archivo CSV de base de datos.")

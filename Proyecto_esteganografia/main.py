@@ -47,14 +47,14 @@ def menu_proteccion():
     op = input("\nSelecciona una opción: ")
     if op == "4": return
 
-    pwd = input("Introduce la Contraseña Maestra: ")
+    
 
     if op == "1":
-        cambiar_estado_csv(PATH_CSV_REPORTE, pwd, "bloquear")
+        cambiar_estado_csv(PATH_CSV_REPORTE,"bloquear")
     elif op == "2":
-        cambiar_estado_csv(PATH_CSV_REPORTE, pwd, "desbloquear")
+        cambiar_estado_csv(PATH_CSV_REPORTE,"desbloquear")
     elif op == "3":
-        cambiar_estado_csv(PATH_CSV_REPORTE, pwd, "obtener")
+        cambiar_estado_csv(PATH_CSV_REPORTE, "obtener")
     else:
         print("Opción no válida.")
 
