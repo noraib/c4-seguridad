@@ -142,3 +142,7 @@ El sistema organiza automáticamente tus archivos en la carpeta `media_cripto_es
 ## Notas Importantes
 
 * **Contraseña Maestra:** Si utilizas la opción de *Caja Fuerte*, asegúrate de recordar tu contraseña maestra, ya que una contraseña olvidada resultará en la pérdida del archivo CSV cifrado.
+
+---
+## Link al repositorio
+Todo el código se puede encontrar clickando [aquí](https://github.com/noraib/c4-seguridad)
