@@ -1,10 +1,13 @@
 from PIL import Image
+import os
 
 def encode_lsb(image_path: str, message: bytes, output_path: str) -> None:
     """
     Inserta un mensaje (en bytes) en la imagen usando LSB.
     """
     # abrir imagen
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
     img = Image.open(image_path)
     img = img.convert("RGB")
     pixels = list(img.getdata())

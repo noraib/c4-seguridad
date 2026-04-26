@@ -1,6 +1,6 @@
 from cripto.aes import generate_key, encrypt_message, decrypt_message
 from esteganografia.lsb import encode_lsb, decode_lsb
-
+from utils import select_file
 
 def main():
     # mensaje y cifrado
@@ -9,7 +9,10 @@ def main():
     encrypted = encrypt_message(message, key)
     
     # imagen ejemplo
-    input_image = "media_cripto_esteg/input/imagen_ejemplo.png"
+    input_image = select_file("Selecciona la imagen base para ocultar el mensaje:")
+    if not input_image:
+        print("[!] Operación cancelada por el usuario.")
+        return
     stego_image = "media_cripto_esteg/output/esteg_imagen.png"
     
     # insertar mensaje cifrado en la imagen
