@@ -16,19 +16,20 @@ El sistema se opera a través de un menú principal (`main.py`) que ofrece las s
 ## Estructura del Proyecto
 
 ```text
-📁 tu_proyecto/
+📁 Proyecto_esteganografia/
 │
 ├── main.py                     # Punto de entrada y menú interactivo del sistema.
 ├── 📁 src/                     
+│   ├── 📁 cripto/              # Módulos de cifrado AES (externo/dependencias).
+│   ├── 📁 esteganografia/      # Módulos de manipulación de LSB (externo/dependencias).
+│   ├── 📁 gan/                 # Scripts de generación de imágenes.
 │   ├── extraer.py              # Lógica para recuperar y descifrar mensajes.
 │   ├── ocultar.py              # Lógica para cifrar y ocultar mensajes.
 │   ├── procesador_masivo.py    # Script para procesar lotes de imágenes y CSVs.
 │   ├── proteger_csv.py         # Sistema de "Caja Fuerte" con Fernet.
-│   ├── utils.py                # Utilidades compartidas
-│   └── 📁 gan/                 # Scripts de generación de imágenes.
-│
-├── 📁 cripto/                  # Módulos de cifrado AES (externo/dependencias).
-├── 📁 esteganografia/          # Módulos de manipulación de LSB (externo/dependencias).
+│   ├── test_aes.py             # Main de prueba para probar encriptación y decriptación.
+│   ├── test_aes+esteg.py       # Main de prueba para probar la integración de la encriptación y decriptación con la inserción en imágenes.
+│   └── utils.py                # Utilidades compartidas
 └── 📁 media_cripto_esteg/      # Carpetas generadas automáticamente para inputs, outputs y archivos csv.
 ```
 
@@ -62,6 +63,12 @@ uv sync
 4.  Aparecerá el menú interactivo. Simplemente introduce el número de la opción que deseas ejecutar y sigue las instrucciones en pantalla.
 
 ---
+
+## Funcionalidades incluidas
+
+
+---
+
 
 ## Notas Importantes
 
